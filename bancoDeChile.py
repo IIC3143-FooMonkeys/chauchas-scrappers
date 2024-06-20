@@ -40,7 +40,7 @@ rootPath = os.path.dirname(envPath)
 dotenvPath = os.path.join(rootPath, '.env')
 load_dotenv(dotenvPath)
 
-mongoUrl = "mongodb+srv://foomonkeys123:donjavicarreame@foomonkeys.4iwzxjk.mongodb.net/?retryWrites=true&w=majority&appName=Foomonkeys"
+mongoUrl = os.getenv("MONGO_URL")
 client = MongoClient(mongoUrl)
 db = client.foomonkeys123
 discountsTable = db["Discounts"]
