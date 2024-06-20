@@ -3,7 +3,7 @@ from faker import Faker
 import random
 
 fake = Faker()
-
+categories = ["sabores","viajes","bienestar","mascota","sustentable"]
 def random_days():
     days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
     choice = random.choice([
@@ -28,7 +28,7 @@ def generate_discount():
         "description": fake.text(),
         "covers": [fake.image_url() for _ in range(2)],
         "tags": fake.words(nb=4),
-        "category": "beneficios/sabores/restaurantes-y-bares",
+        "category": f"beneficios/{random.choice(categories)}",
         "site_id": 1,
         "video_url": fake.url() if random.choice([True, False]) else "",
         "details": {

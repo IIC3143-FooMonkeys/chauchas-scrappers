@@ -12,8 +12,8 @@ locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
 # Definición de modelos y funciones de utilidad
 from pydantic import BaseModel
 import datetime as d
-
 class Discount(BaseModel): #Modificar en base al E-R
+    id: str
     url: str
     local: str
     discount: int
@@ -34,35 +34,19 @@ class Card(BaseModel):
 class Category(BaseModel):
     categoryName: str
 
-
-def discountEntity(discount) -> dict:
-    discount['id'] = str(discount['_id'])
-    del discount['_id']
-    return {
-        "id": discount["id"],
-        "name": str(discount["name"]),
-        "category": str(discount["category"]),
-        "url": str(discount["url"]),
-        "local": str(discount["title"]),
-        "discount": int(discount["discount"]),
-        "description": str(discount["description"]),
-        "expiration": discount["expiration"],
-        "days": str(discount["days"])
-    }
-
-def discountEntities(entity) -> list:
-    return [discountEntity(discount) for discount in entity]
-
 # Cargar variables de entorno
 envPath = os.path.abspath(os.path.dirname(__file__))
 rootPath = os.path.dirname(envPath)
 dotenvPath = os.path.join(rootPath, '.env')
 load_dotenv(dotenvPath)
 
-mongoUrl = os.getenv("MONGO_URL")
+mongoUrl = "mongodb+srv://foomonkeys123:donjavicarreame@foomonkeys.4iwzxjk.mongodb.net/?retryWrites=true&w=majority&appName=Foomonkeys"
 client = MongoClient(mongoUrl)
 db = client.foomonkeys123
 discountsTable = db["Discounts"]
+banksTable = db["Banks"]
+userCardsTable = db["Cards"]
+categoriesTable = db["Categories"]
 
 def extract_discount(excerpt):
     match = re.search(r'(\d+)', excerpt)
@@ -78,31 +62,52 @@ def parse_expiration(conditions):
             pass
     return None
 
-def parse_days(conditions):
-    if "Todos los días" in conditions:
-        return "Todos los días"
-    match = re.search(r'(Lunes|Martes|Miércoles|Jueves|Viernes|Sábado|Domingo)( a (Lunes|Martes|Miércoles|Jueves|Viernes|Sábado|Domingo))?', conditions)
+def parse_days(summary):
+    days_pattern = r'(Todos los días|Lunes|Martes|Miércoles|Jueves|Viernes|Sábado|Domingo)( a (Lunes|Martes|Miércoles|Jueves|Viernes|Sábado|Domingo))?'
+    match = re.search(days_pattern, summary)
     if match:
-        if match.group(2):
+        if match.group(3):
             return f"{match.group(1)} a {match.group(3)}"
         else:
             return match.group(1)
     return "Desconocido"
 
-def insert_discounts(data):
+def insert_discounts(data, category_ids):
     for item in data:
         expiration_date = parse_expiration(item["details"].get("conditions"))
-        days = parse_days(item["details"].get("conditions"))
+        days = parse_days(item["details"].get("summary"))
+
+        category = "None"
+        if item.get("category", "").startswith("beneficios/sabores"):
+            category = category_ids["Comida"]
+        elif item.get("category", "").startswith("beneficios/viajes"):
+            category = category_ids["Transporte"]
+        elif item.get("category", "").startswith("beneficios/bienestar"):
+            category = category_ids["Bienestar"]
+        elif item.get("category", "").startswith("beneficios/mascota"):
+            category = category_ids["Mascotas"]
+
         discount = {
             "url": item.get("url"),
             "local": item.get("title"),
             "discount": extract_discount(item.get("excerpt")),
             "description": item.get("description"),
-            "category": "Comida" if item.get("category", "").startswith("beneficios/sabores") else item.get("category"),
+            "category": category,
             "expiration": expiration_date,
             "days": days
         }
         discountsTable.insert_one(discount)
+
+def insert_categories():
+    categories = ["Comida", "Transporte", "Bienestar", "Mascotas"]
+    category_ids = {}
+    for category in categories:
+        categoria = {
+            "categoryName": category
+        }
+        result = categoriesTable.insert_one(categoria)
+        category_ids[category] = str(result.inserted_id)
+    return category_ids
 
 # Leer datos desde discounts.json
 with open('Data/descuentos_simulados.json', 'r', encoding='utf-8') as file:
@@ -110,4 +115,7 @@ with open('Data/descuentos_simulados.json', 'r', encoding='utf-8') as file:
 
 # Insertar los datos en la base de datos
 discountsTable.delete_many({})
-insert_discounts(data)
+categoriesTable.delete_many({})
+category_ids = insert_categories()
+insert_discounts(data,category_ids)
+
