@@ -3,7 +3,7 @@ from faker import Faker
 import random
 
 fake = Faker()
-categories = ["sabores","viajes","bienestar","mascota","sustentable"]
+categories = ["sabores","viajes","bienestar","mascota"]
 def random_days():
     days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
     choice = random.choice([
@@ -12,9 +12,15 @@ def random_days():
         f"{random.choice(days)} a {random.choice(days)}"
     ])
     return choice
-
+cards = [["","Bronze","Silver","Gold","Silver,Gold","Bronze,Gold","Bronze,Silver"],["","Black","Diamond","Black,Diamond"]]
 def generate_discount():
     days = random_days()
+    ch = random.choice([0,1])
+    mes = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
+    if ch == 0:
+        name = "Banco de Chile"
+    else:
+        name = "Banco Santander"
     return {
         "id": fake.random_number(digits=5),
         "uuid": fake.uuid4(),
@@ -30,7 +36,9 @@ def generate_discount():
         "tags": fake.words(nb=4),
         "category": f"beneficios/{random.choice(categories)}",
         "site_id": 1,
+        "cards": random.choice(cards[ch]),
         "video_url": fake.url() if random.choice([True, False]) else "",
+        "bank":name,
         "details": {
             "summary": f"{random.choice([20, 25, 30, 35])}% de dcto. {days} en consumo presencial.",
             "list": [
@@ -39,7 +47,7 @@ def generate_discount():
                 "Si tienes Plan Cordillera obtén 10% de dcto. adicional.",
                 "Si tienes Plan Océano obtén 20% de dcto. adicional."
             ],
-            "conditions": "Promoción válida hasta el 31 de diciembre de 2025. No acumulable con otras promociones."
+            "conditions": f"Promoción válida hasta el {random.randint(1,27)} de {random.choice(mes)} de {random.randint(2025,2030)}. No acumulable con otras promociones."
         }
     }
 
