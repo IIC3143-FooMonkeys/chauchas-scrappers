@@ -40,13 +40,14 @@ rootPath = os.path.dirname(envPath)
 dotenvPath = os.path.join(rootPath, '.env')
 load_dotenv(dotenvPath)
 
-mongoUrl = "mongodb+srv://foomonkeys123:donjavicarreame@foomonkeys.4iwzxjk.mongodb.net/?retryWrites=true&w=majority&appName=Foomonkeys"
+mongoUrl = "tehee"
 client = MongoClient(mongoUrl)
 db = client.foomonkeys123
 discountsTable = db["Discounts"]
 banksTable = db["Banks"]
 cardsTable = db["Cards"]
 categoriesTable = db["Categories"]
+usersTable = db["Users"]
 
 def extract_discount(excerpt):
     match = re.search(r'(\d+)', excerpt)
@@ -120,7 +121,7 @@ def insert_categories():
     category_ids = {}
     for category in categories:
         categoria = {
-            "categoryName": category
+            "name": category
         }
         result = categoriesTable.insert_one(categoria)
         category_ids[category] = str(result.inserted_id)
@@ -136,15 +137,16 @@ def insert_banks():
     return result.inserted_id
 
 def insert_cards(bank_id):
-    cards = ["Bronze","Silver","Gold"]
+    cards = [["Bronze","Debito"],["Silver","Credito"],["Gold","Credito"]]
     card_ids = {}
     for card in cards:
         tarjeta = {
             "bankId": bank_id,
-            "cardType": card
+            "cardType": card[0],
+            "paymentMethod": card[1]
         }
         result = cardsTable.insert_one(tarjeta)
-        card_ids[card] = str(result.inserted_id)
+        card_ids[card[0]] = str(result.inserted_id)
     return card_ids
 
 # Leer datos desde discounts.json
@@ -156,6 +158,7 @@ discountsTable.delete_many({})
 categoriesTable.delete_many({})
 cardsTable.delete_many({})
 banksTable.delete_many({})
+usersTable.delete_many({})
 bank_id = insert_banks()
 category_ids = insert_categories()
 card_ids = insert_cards(bank_id)
