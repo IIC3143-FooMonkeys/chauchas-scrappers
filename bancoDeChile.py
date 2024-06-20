@@ -45,7 +45,7 @@ client = MongoClient(mongoUrl)
 db = client.foomonkeys123
 discountsTable = db["Discounts"]
 banksTable = db["Banks"]
-userCardsTable = db["Cards"]
+cardsTable = db["Cards"]
 categoriesTable = db["Categories"]
 
 def extract_discount(excerpt):
@@ -72,7 +72,7 @@ def parse_days(summary):
             return match.group(1)
     return "Desconocido"
 
-def insert_discounts(data, category_ids):
+def insert_discounts(data, category_ids, card_ids):
     for item in data:
         expiration_date = parse_expiration(item["details"].get("conditions"))
         days = parse_days(item["details"].get("summary"))
@@ -86,18 +86,35 @@ def insert_discounts(data, category_ids):
             category = category_ids["Bienestar"]
         elif item.get("category", "").startswith("beneficios/mascota"):
             category = category_ids["Mascotas"]
+        lista = item.get("cards").split(",")
 
-        discount = {
-            "url": item.get("url"),
-            "local": item.get("title"),
-            "discount": extract_discount(item.get("excerpt")),
-            "description": item.get("description"),
-            "category": category,
-            "expiration": expiration_date,
-            "days": days
-        }
-        discountsTable.insert_one(discount)
-
+        if item.get("cards") == "":
+            cards = ["Bronze", "Silver", "Gold"]
+            for card in cards:
+                discount = {
+                    "url": item.get("url"),
+                    "local": item.get("title"),
+                    "discount": extract_discount(item.get("excerpt")),
+                    "description": item.get("description"),
+                    "category": category,
+                    "expiration": expiration_date,
+                    "days": days,
+                    "card": card_ids[card]
+                }
+                discountsTable.insert_one(discount)
+        else:
+            for elemento in lista:
+                discount = {
+                    "url": item.get("url"),
+                    "local": item.get("title"),
+                    "discount": extract_discount(item.get("excerpt")),
+                    "description": item.get("description"),
+                    "category": category,
+                    "expiration": expiration_date,
+                    "days": days,
+                    "card": card_ids[elemento]
+                }
+                discountsTable.insert_one(discount)
 def insert_categories():
     categories = ["Comida", "Transporte", "Bienestar", "Mascotas"]
     category_ids = {}
@@ -109,6 +126,27 @@ def insert_categories():
         category_ids[category] = str(result.inserted_id)
     return category_ids
 
+def insert_banks():
+    banks = ["Banco de Chile"]
+    for bank in banks:
+        bank = {
+            "name": bank
+        }
+        result = banksTable.insert_one(bank)
+    return result.inserted_id
+
+def insert_cards(bank_id):
+    cards = ["Bronze","Silver","Gold"]
+    card_ids = {}
+    for card in cards:
+        tarjeta = {
+            "bankId": bank_id,
+            "cardType": card
+        }
+        result = cardsTable.insert_one(tarjeta)
+        card_ids[card] = str(result.inserted_id)
+    return card_ids
+
 # Leer datos desde discounts.json
 with open('Data/descuentos_simulados.json', 'r', encoding='utf-8') as file:
     data = json.load(file)
@@ -116,6 +154,10 @@ with open('Data/descuentos_simulados.json', 'r', encoding='utf-8') as file:
 # Insertar los datos en la base de datos
 discountsTable.delete_many({})
 categoriesTable.delete_many({})
+cardsTable.delete_many({})
+banksTable.delete_many({})
+bank_id = insert_banks()
 category_ids = insert_categories()
-insert_discounts(data,category_ids)
+card_ids = insert_cards(bank_id)
+insert_discounts(data,category_ids,card_ids)
 

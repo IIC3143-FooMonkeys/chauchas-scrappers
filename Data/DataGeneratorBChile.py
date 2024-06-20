@@ -12,7 +12,7 @@ def random_days():
         f"{random.choice(days)} a {random.choice(days)}"
     ])
     return choice
-
+cards = ["","Silver","Gold","Silver,Gold"]
 def generate_discount():
     days = random_days()
     return {
@@ -30,6 +30,7 @@ def generate_discount():
         "tags": fake.words(nb=4),
         "category": f"beneficios/{random.choice(categories)}",
         "site_id": 1,
+        "cards": random.choice(cards),
         "video_url": fake.url() if random.choice([True, False]) else "",
         "details": {
             "summary": f"{random.choice([20, 25, 30, 35])}% de dcto. {days} en consumo presencial.",
