@@ -6,6 +6,7 @@ from datetime import datetime
 import re
 import locale
 import random
+from bson import ObjectId
 
 # Configurar el locale para español
 locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
@@ -41,7 +42,7 @@ rootPath = os.path.dirname(envPath)
 dotenvPath = os.path.join(rootPath, '.env')
 load_dotenv(dotenvPath)
 
-mongoUrl = "tehee"
+mongoUrl = ""
 client = MongoClient(mongoUrl)
 db = client.foomonkeys123
 discountsTable = db["Discounts"]
@@ -182,11 +183,13 @@ def insert_banks():
     banks = ["Banco de Chile", "Banco Santander"]
     bank_ids = {}
     for bank in banks:
+        bankid = ObjectId()
         banco = {
-            "name": bank
+            "name": bank,
+            "id": str(bankid)
         }
         result = banksTable.insert_one(banco)
-        bank_ids[bank] = str(result.inserted_id)
+        bank_ids[bank] = str(bankid)
     return bank_ids
 
 def insert_cards(bank_ids):
