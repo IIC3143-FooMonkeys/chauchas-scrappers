@@ -97,7 +97,7 @@ def insert_discounts(data, category_ids, card_ids):
                 for card in cards:
                     discount = {
                         "url": item.get("url"),
-                        "imageUrl": item.get("imageUrl"),
+                        "imageUrl": item.get("image_url"),
                         "local": item.get("title"),
                         "discount": extract_discount(item.get("excerpt")),
                         "description": item.get("description"),
@@ -119,7 +119,7 @@ def insert_discounts(data, category_ids, card_ids):
 
                     discount = {
                         "url": item.get("url"),
-                        "imageUrl": item.get("imageUrl"),
+                        "imageUrl": item.get("image_url"),
                         "local": item.get("title"),
                         "discount": extract_discount(item.get("excerpt")),
                         "description": item.get("description"),
@@ -138,7 +138,7 @@ def insert_discounts(data, category_ids, card_ids):
                 for card in cards:
                     discount = {
                         "url": item.get("url"),
-                        "imageUrl": item.get("imageUrl"),
+                        "imageUrl": item.get("image_url"),
                         "local": item.get("title"),
                         "discount": extract_discount(item.get("excerpt")),
                         "description": item.get("description"),
@@ -160,7 +160,7 @@ def insert_discounts(data, category_ids, card_ids):
 
                     discount = {
                         "url": item.get("url"),
-                        "imageUrl": item.get("imageUrl"),
+                        "imageUrl": item.get("image_url"),
                         "local": item.get("title"),
                         "discount": extract_discount(item.get("excerpt")),
                         "description": item.get("description"),
