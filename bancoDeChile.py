@@ -36,6 +36,7 @@ class Card(BaseModel):
 class Category(BaseModel):
     categoryName: str
 
+
 # Cargar variables de entorno
 envPath = os.path.abspath(os.path.dirname(__file__))
 rootPath = os.path.dirname(envPath)
@@ -96,6 +97,7 @@ def insert_discounts(data, category_ids, card_ids):
                 for card in cards:
                     discount = {
                         "url": item.get("url"),
+                        "imageUrl": item.get("imageUrl"),
                         "local": item.get("title"),
                         "discount": extract_discount(item.get("excerpt")),
                         "description": item.get("description"),
@@ -104,7 +106,7 @@ def insert_discounts(data, category_ids, card_ids):
                         "days": days,
                         "card": card_ids[card[0]],
                         "cardType": card[0],
-                        "paymentType": card[1],
+                        "paymentMethod": card[1],
                         "bankName": "Banco de Chile"
                     }
                     discountsTable.insert_one(discount)
@@ -117,6 +119,7 @@ def insert_discounts(data, category_ids, card_ids):
 
                     discount = {
                         "url": item.get("url"),
+                        "imageUrl": item.get("imageUrl"),
                         "local": item.get("title"),
                         "discount": extract_discount(item.get("excerpt")),
                         "description": item.get("description"),
@@ -125,7 +128,7 @@ def insert_discounts(data, category_ids, card_ids):
                         "days": days,
                         "card": card_ids[elemento],
                         "cardType":elemento,
-                        "paymentType": type,
+                        "paymentMethod": type,
                         "bankName": "Banco de Chile"
                     }
                     discountsTable.insert_one(discount)
@@ -135,6 +138,7 @@ def insert_discounts(data, category_ids, card_ids):
                 for card in cards:
                     discount = {
                         "url": item.get("url"),
+                        "imageUrl": item.get("imageUrl"),
                         "local": item.get("title"),
                         "discount": extract_discount(item.get("excerpt")),
                         "description": item.get("description"),
@@ -143,7 +147,7 @@ def insert_discounts(data, category_ids, card_ids):
                         "days": days,
                         "card": card_ids[card[0]],
                         "cardType": card[0],
-                        "paymentType": card[1],
+                        "paymentMethod": card[1],
                         "bankName": "Banco Santander"
                     }
                     discountsTable.insert_one(discount)
@@ -156,6 +160,7 @@ def insert_discounts(data, category_ids, card_ids):
 
                     discount = {
                         "url": item.get("url"),
+                        "imageUrl": item.get("imageUrl"),
                         "local": item.get("title"),
                         "discount": extract_discount(item.get("excerpt")),
                         "description": item.get("description"),
@@ -164,7 +169,7 @@ def insert_discounts(data, category_ids, card_ids):
                         "days": days,
                         "card": card_ids[elemento],
                         "cardType": elemento,
-                        "paymentType": type,
+                        "paymentMethod": type,
                         "bankName": "Banco Santander"
                     }
                     discountsTable.insert_one(discount)
@@ -207,6 +212,15 @@ def insert_cards(bank_ids):
         card_ids[card[0]] = str(result.inserted_id)
     return card_ids
 
+def insert_one_admin():
+    fakeId = str(ObjectId())
+    user = {
+        "auth0Id": fakeId,
+        "userType": 1,
+        "cards": []
+    }
+    result = usersTable.insert_one(user)
+    return fakeId
 # Leer datos desde discounts.json
 with open('Data/descuentos_simulados.json', 'r', encoding='utf-8') as file:
     data = json.load(file)
@@ -222,4 +236,6 @@ category_ids = insert_categories()
 print(category_ids)
 card_ids = insert_cards(bank_ids)
 insert_discounts(data,category_ids,card_ids)
+adm = insert_one_admin()
+print(adm)
 

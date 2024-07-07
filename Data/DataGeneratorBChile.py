@@ -37,6 +37,7 @@ def generate_discount():
         "category": f"beneficios/{random.choice(categories)}",
         "site_id": 1,
         "cards": random.choice(cards[ch]),
+        "image_url": fake.image_url(),
         "video_url": fake.url() if random.choice([True, False]) else "",
         "bank":name,
         "details": {
